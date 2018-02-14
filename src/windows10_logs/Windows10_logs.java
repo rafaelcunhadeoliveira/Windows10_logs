@@ -18,9 +18,10 @@ public class Windows10_logs {
      * @throws java.sql.SQLException
      */
     public static void main(String[] args) throws SQLException {
-        new DataBase().conectar();
         new Home().setVisible(true);
-        
+//        DataBase x = new DataBase();
+//        x.conectar();
+//        x.insertIntoGroups("lab", "laboratorio");
     }
     
 }

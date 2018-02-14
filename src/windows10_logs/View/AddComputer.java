@@ -8,6 +8,12 @@ package windows10_logs.View;
 import Controller.*;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+
 
 /**
  *
@@ -16,21 +22,23 @@ import java.util.*;
 public class AddComputer extends javax.swing.JFrame {
 
     List<String> groups = new ArrayList<>();
+    String id = "";
+    String groupId = "";
 
-    /**
-     * Creates new form AddComputer
-     *
-     * @throws java.sql.SQLException
-     */
-    public AddComputer() throws SQLException {
+    public AddComputer(){
         initComponents();
-        //populate();
+        try {
+            populate();
+        } catch (SQLException ex) {
+            Logger.getLogger(AddComputer.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     public void populate() throws SQLException {
         DataBase actions = new DataBase();
-        groups = actions.selectFromGroup();
-
+        actions.conectar();
+        this.groups = actions.selectFromGroup();
+        jComboBox2.setModel(new DefaultComboBoxModel(groups.toArray()));
     }
 
     /**
@@ -78,6 +86,11 @@ public class AddComputer extends javax.swing.JFrame {
         });
 
         jButton1.setText("Save");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -134,6 +147,27 @@ public class AddComputer extends javax.swing.JFrame {
     private void jComboBox2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox2ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jComboBox2ActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        //Save button
+        DataBase insertDB = new DataBase();
+        this.id = jTextField2.getText();
+        this.groupId = (String)jComboBox2.getSelectedItem();
+        JFrame parent = new JFrame();
+        if (this.id.equalsIgnoreCase("")) {
+            JOptionPane.showMessageDialog(parent, "Ops, faltam algumas informações");
+        } else {
+            try {
+                insertDB.conectar();
+                insertDB.insertIntoComputer(this.id, this.groupId);
+                JOptionPane.showMessageDialog(parent, "Computador Inserido!");
+                insertDB.closeCon();
+            } catch (SQLException ex) {
+                Logger.getLogger(AddGroup.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * @param args the command line arguments

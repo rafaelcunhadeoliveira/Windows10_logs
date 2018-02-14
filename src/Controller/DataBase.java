@@ -33,7 +33,17 @@ public class DataBase {
         }
 
     }
+    
+    public void closeCon() throws SQLException{
+        connection.close();
+    }
 
+    /**
+     *
+     * @param name
+     * @param desc
+     * @throws SQLException
+     */
     public void insertIntoGroups(String name, String desc) throws SQLException {
         String insertIntoTable = "INSERT INTO Windows10_Logs.Group (Name, Description) VALUES (?,?);";
 
@@ -59,7 +69,7 @@ public class DataBase {
         }
     }
 
-    public Boolean insertIntoComputer(String name, String group) throws SQLException {
+    public void insertIntoComputer(String name, String group) throws SQLException {
         String insertIntoTable = "INSERT INTO Windows10_Logs.Group (Name, Group_idGroup) VALUES (?,?);";
 
         try {
@@ -75,7 +85,6 @@ public class DataBase {
         } catch (SQLException e) {
 
             System.out.println(e.getMessage());
-            return false;
 
         } finally {
 
@@ -83,7 +92,6 @@ public class DataBase {
                 preparedStatement.close();
             }
         }
-        return true;
     }
 
     public List<String> selectFromGroup() throws SQLException {
