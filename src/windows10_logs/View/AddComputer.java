@@ -21,9 +21,9 @@ import javax.swing.JOptionPane;
  */
 public class AddComputer extends javax.swing.JFrame {
 
-    List<String> groups = new ArrayList<>();
-    String id = "";
-    String groupId = "";
+    HashMap<Integer, String> groups = new HashMap<>();
+    String idComputer = "";
+    int groupId;
 
     public AddComputer(){
         initComponents();
@@ -38,7 +38,7 @@ public class AddComputer extends javax.swing.JFrame {
         DataBase actions = new DataBase();
         actions.conectar();
         this.groups = actions.selectFromGroup();
-        jComboBox2.setModel(new DefaultComboBoxModel(groups.toArray()));
+        jComboBox2.setModel(new DefaultComboBoxModel(groups.values().toArray()));
     }
 
     /**
@@ -151,15 +151,16 @@ public class AddComputer extends javax.swing.JFrame {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         //Save button
         DataBase insertDB = new DataBase();
-        this.id = jTextField2.getText();
-        this.groupId = (String)jComboBox2.getSelectedItem();
+        this.idComputer = jTextField2.getText();
+        String value = (String)jComboBox2.getSelectedItem();
+        this.groupId = new Logic().getIdFromHashMap(this.groups, value);
         JFrame parent = new JFrame();
-        if (this.id.equalsIgnoreCase("")) {
+        if (this.idComputer.equalsIgnoreCase("")) {
             JOptionPane.showMessageDialog(parent, "Ops, faltam algumas informações");
         } else {
             try {
                 insertDB.conectar();
-                insertDB.insertIntoComputer(this.id, this.groupId);
+                insertDB.insertIntoComputer(this.idComputer, this.groupId);
                 JOptionPane.showMessageDialog(parent, "Computador Inserido!");
                 insertDB.closeCon();
             } catch (SQLException ex) {

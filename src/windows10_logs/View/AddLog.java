@@ -4,8 +4,17 @@
  * and open the template in the editor.
  */
 package windows10_logs.View;
-import javax.swing.*;
 
+import Controller.DataBase;
+import Controller.Logic;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  *
@@ -13,12 +22,24 @@ import javax.swing.*;
  */
 public class AddLog extends javax.swing.JFrame {
 
-    /**
-     * Creates new form Home
-     */
+    private HashMap<Integer, String> groups = new HashMap<>();
+    private int groupId;
+    private HashMap<Integer, String> computers;
+    DataBase actions = new DataBase();
+
     public AddLog() {
         initComponents();
-        loadScreen();
+        try {
+            populate();
+        } catch (SQLException ex) {
+            Logger.getLogger(AddLog.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void populate() throws SQLException {
+        actions.conectar();
+        this.populateGroup();
+        this.populateComp();
     }
 
     /**
@@ -64,7 +85,7 @@ public class AddLog extends javax.swing.JFrame {
             }
         });
 
-        jLabel1.setText("Windows ID");
+        jLabel1.setText("Log ID");
 
         jTextField2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -85,8 +106,18 @@ public class AddLog extends javax.swing.JFrame {
 
         jComboBox1.setMaximumRowCount(10000);
         jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "" }));
+        jComboBox1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBox1ActionPerformed(evt);
+            }
+        });
 
         jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "" }));
+        jComboBox2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBox2ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -146,12 +177,8 @@ public class AddLog extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        JFileChooser chooser = new JFileChooser();
-        //chooser.setCurrentDirectory(dir);
-        chooser.setDialogTitle("Windows 10 Log");
-        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        chooser.showOpenDialog(this);
-        
+        setFileChooser();
+
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
@@ -168,6 +195,61 @@ public class AddLog extends javax.swing.JFrame {
         new Home().setVisible(true);
     }//GEN-LAST:event_jButton2ActionPerformed
 
+    private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jComboBox1ActionPerformed
+
+    private void jComboBox2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox2ActionPerformed
+        // TODO add your handling code here:
+        this.populateComp();
+    }//GEN-LAST:event_jComboBox2ActionPerformed
+    
+    public void populateGroup() {
+        try {
+            this.groups = actions.selectFromGroup();
+            jComboBox2.setModel(new DefaultComboBoxModel(groups.values().toArray()));
+        } catch (SQLException ex) {
+            Logger.getLogger(AddLog.class.getName()).log(Level.SEVERE, null, ex);
+        }  
+    }
+
+    public void populateComp(){
+        try {
+            String value = (String) jComboBox2.getSelectedItem();
+            this.groupId = new Logic().getIdFromHashMap(this.groups, value);
+            this.computers = actions.selectFromComputersUsingWhere(groupId);
+            JFrame parent = new JFrame();
+            if (computers.isEmpty()) {
+                JOptionPane.showMessageDialog(parent, "Não há computadores associados a este grupo!");
+                jComboBox1.setEnabled(false);
+            } else {
+                jComboBox1.setEnabled(true);
+            }
+            jComboBox1.setModel(new DefaultComboBoxModel(computers.values().toArray()));
+        } catch (SQLException ex) {
+            Logger.getLogger(AddLog.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    public void setFileChooser(){
+                JFileChooser chooser = new JFileChooser();
+        FileNameExtensionFilter logFilter = new FileNameExtensionFilter("evtx Files (*.evtx)", "evtx");
+        chooser.setDialogTitle("Windows 10 Log");
+        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        chooser.addChoosableFileFilter(logFilter);
+        chooser.setFileFilter(logFilter);
+        chooser.showOpenDialog(this);
+        String path = chooser.getSelectedFile().toString();
+        
+//        if(path.contains("evtx")){
+            jTextField1.setText(path);
+//        }
+//        else {
+//            jTextField1.setText("");
+//            JFrame parent = new JFrame();
+//            JOptionPane.showMessageDialog(parent, "Arquivo errado");
+//        }
+    }
     /**
      * @param args the command line arguments
      */
@@ -215,8 +297,6 @@ public class AddLog extends javax.swing.JFrame {
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField2;
     // End of variables declaration//GEN-END:variables
-    public void loadScreen(){
-        this.jComboBox1.setEnabled(false);
-    }
+
 
 }

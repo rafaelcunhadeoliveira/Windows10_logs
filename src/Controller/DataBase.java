@@ -48,7 +48,7 @@ public class DataBase {
         String insertIntoTable = "INSERT INTO Windows10_Logs.Group (Name, Description) VALUES (?,?);";
 
         try {
-            preparedStatement = connection.prepareStatement(insertIntoTable);
+            preparedStatement = connection.prepareStatement(insertIntoTable, Statement.RETURN_GENERATED_KEYS);
 
             preparedStatement.setString(1, name);
             preparedStatement.setString(2, desc);
@@ -69,14 +69,14 @@ public class DataBase {
         }
     }
 
-    public void insertIntoComputer(String name, String group) throws SQLException {
-        String insertIntoTable = "INSERT INTO Windows10_Logs.Group (Name, Group_idGroup) VALUES (?,?);";
+    public void insertIntoComputer(String name, int group) throws SQLException {
+        String insertIntoTable = "INSERT INTO Windows10_Logs.Computer (Name, Group_idGroup) VALUES (?,?);";
 
         try {
-            preparedStatement = connection.prepareStatement(insertIntoTable);
+            preparedStatement = connection.prepareStatement(insertIntoTable,  Statement.RETURN_GENERATED_KEYS);
 
             preparedStatement.setString(1, name);
-            preparedStatement.setString(2, group);
+            preparedStatement.setInt(2, group);
 
             preparedStatement.executeUpdate();
 
@@ -94,20 +94,20 @@ public class DataBase {
         }
     }
 
-    public List<String> selectFromGroup() throws SQLException {
-        String selectTableSQL = "SELECT NAME FROM Windows10_Logs.Group;";
-        List<String> allGroups = new ArrayList<>();
+    public HashMap<Integer, String> selectFromGroup() throws SQLException {
+        String selectTableSQL = "SELECT * FROM Windows10_Logs.Group;";
+        HashMap<Integer, String> allGroups = new HashMap<>();
         try {
 
-            statement = connection.createStatement();
+            preparedStatement = connection.prepareStatement(selectTableSQL, Statement.RETURN_GENERATED_KEYS);
+            ResultSet rs = preparedStatement.executeQuery();
 
-            System.out.println(selectTableSQL);
-
-            // execute select SQL stetement
-            ResultSet rs = statement.executeQuery(selectTableSQL);
-
+            int id;
+            String name;
             while (rs.next()) {
-                allGroups.add(rs.getString("Name"));
+                id = rs.getInt(1);
+                name = rs.getString(2);
+                allGroups.put(id, name);
             }
 
         } catch (SQLException e) {
@@ -126,20 +126,20 @@ public class DataBase {
         return allGroups;
     }
 
-    public List<String> selectFromComputers() throws SQLException {
-        String selectTableSQL = "SELECT NAME FROM Windows10_Logs.Computer;";
-        List<String> allComp = new ArrayList<>();
+    public HashMap<Integer, String> selectFromComputers() throws SQLException {
+        String selectTableSQL = "SELECT * FROM Windows10_Logs.Computer;";
+        HashMap<Integer, String> allComputers = new HashMap<>();
         try {
 
-            statement = connection.createStatement();
+            preparedStatement = connection.prepareStatement(selectTableSQL, Statement.RETURN_GENERATED_KEYS);
+            ResultSet rs = preparedStatement.executeQuery();
 
-            System.out.println(selectTableSQL);
-
-            // execute select SQL stetement
-            ResultSet rs = statement.executeQuery(selectTableSQL);
-
+            int id;
+            String name;
             while (rs.next()) {
-                allComp.add(rs.getString("Name"));
+                id = rs.getInt(1);
+                name = rs.getString(2);
+                allComputers.put(id, name);
             }
 
         } catch (SQLException e) {
@@ -155,7 +155,39 @@ public class DataBase {
             }
 
         }
-        return allComp;
+        return allComputers;
+    }
+    
+     public HashMap<Integer, String> selectFromComputersUsingWhere(int groupId) throws SQLException {
+        String selectTableSQL = "SELECT * from Windows10_Logs.Computer  WHERE  Group_idGroup = " +groupId+ ";";
+        HashMap<Integer, String> allComputers = new HashMap<>();
+        try {
+
+            preparedStatement = connection.prepareStatement(selectTableSQL, Statement.RETURN_GENERATED_KEYS);
+            ResultSet rs = preparedStatement.executeQuery();
+
+            int id;
+            String name;
+            while (rs.next()) {
+                id = rs.getInt(1);
+                name = rs.getString(2);
+                allComputers.put(id, name);
+            }
+
+        } catch (SQLException e) {
+
+            System.out.println(e.getMessage());
+
+        } finally {
+
+            if (preparedStatement != null) {
+
+                preparedStatement.close();
+
+            }
+
+        }
+        return allComputers;
     }
 
 }
