@@ -26,6 +26,7 @@ public class AddLog extends javax.swing.JFrame {
     private int groupId;
     private HashMap<Integer, String> computers;
     DataBase actions = new DataBase();
+    private Boolean populateComp = false;
 
     public AddLog() {
         initComponents();
@@ -201,6 +202,7 @@ public class AddLog extends javax.swing.JFrame {
 
     private void jComboBox2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox2ActionPerformed
         // TODO add your handling code here:
+        this.populateComp = true;
         this.populateComp();
     }//GEN-LAST:event_jComboBox2ActionPerformed
     
@@ -220,8 +222,10 @@ public class AddLog extends javax.swing.JFrame {
             this.computers = actions.selectFromComputersUsingWhere(groupId);
             JFrame parent = new JFrame();
             if (computers.isEmpty()) {
-                JOptionPane.showMessageDialog(parent, "Não há computadores associados a este grupo!");
-                jComboBox1.setEnabled(false);
+                if (this.populateComp) {
+                    JOptionPane.showMessageDialog(parent, "Não há computadores associados a este grupo!");
+                    jComboBox1.setEnabled(false);
+                }
             } else {
                 jComboBox1.setEnabled(true);
             }
