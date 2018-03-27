@@ -9,6 +9,7 @@ import Controller.DataBase;
 import Controller.Logic;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.logging.Level;
@@ -25,8 +26,10 @@ public class AddLog extends javax.swing.JFrame {
     private HashMap<Integer, String> groups = new HashMap<>();
     private int groupId;
     private HashMap<Integer, String> computers;
-    DataBase actions = new DataBase();
+    private DataBase actions = new DataBase();
     private Boolean populateComp = false;
+    private Logic logic = new Logic();
+    private String path = "";
 
     public AddLog() {
         initComponents();
@@ -125,29 +128,33 @@ public class AddLog extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 70, Short.MAX_VALUE)
+                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(121, 121, 121)
-                        .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 353, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton1))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel2)
                             .addComponent(jLabel3))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addGap(74, 74, 74))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jComboBox1, 0, 133, Short.MAX_VALUE)
+                            .addComponent(jComboBox2, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(0, 350, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(121, 121, 121)
+                                .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 353, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButton1))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel1)
+                                .addGap(39, 39, 39)
+                                .addComponent(jTextField2)
+                                .addGap(225, 225, 225)))
+                        .addGap(74, 74, 74))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -183,6 +190,13 @@ public class AddLog extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        try {
+            //saveButton
+            logic.turnEvtxIntoCSV(path);
+            logic.openCSV();
+        } catch (IOException ex) {
+            Logger.getLogger(AddLog.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
     }//GEN-LAST:event_jButton3ActionPerformed
 
@@ -218,7 +232,7 @@ public class AddLog extends javax.swing.JFrame {
     public void populateComp(){
         try {
             String value = (String) jComboBox2.getSelectedItem();
-            this.groupId = new Logic().getIdFromHashMap(this.groups, value);
+            this.groupId = logic.getIdFromHashMap(this.groups, value);
             this.computers = actions.selectFromComputersUsingWhere(groupId);
             JFrame parent = new JFrame();
             if (computers.isEmpty()) {
@@ -236,27 +250,17 @@ public class AddLog extends javax.swing.JFrame {
     }
     
     public void setFileChooser(){
-                JFileChooser chooser = new JFileChooser();
+        JFileChooser chooser = new JFileChooser();
         FileNameExtensionFilter logFilter = new FileNameExtensionFilter("evtx Files (*.evtx)", "evtx");
         chooser.setDialogTitle("Windows 10 Log");
         chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         chooser.addChoosableFileFilter(logFilter);
         chooser.setFileFilter(logFilter);
         chooser.showOpenDialog(this);
-        String path = chooser.getSelectedFile().toString();
+        path = chooser.getSelectedFile().toString();
+        jTextField1.setText(path);
         
-//        if(path.contains("evtx")){
-            jTextField1.setText(path);
-//        }
-//        else {
-//            jTextField1.setText("");
-//            JFrame parent = new JFrame();
-//            JOptionPane.showMessageDialog(parent, "Arquivo errado");
-//        }
     }
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">

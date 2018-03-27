@@ -1,0 +1,1 @@
+Get-WinEvent -Path “C:\Users\rafae\Desktop\log win 10\Logs1\Microsoft-Windows-Application-Experience%4Program-Compatibility-Assistant.evtx” | Export-Csv “C:\Users\rafae\Desktop\event.csv”

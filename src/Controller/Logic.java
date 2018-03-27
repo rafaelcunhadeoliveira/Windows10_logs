@@ -5,13 +5,17 @@
  */
 package Controller;
 
+import com.profesorfalken.jpowershell.PowerShell;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.KeyStore.Entry;
 import java.util.*;
 import javax.swing.*;
+
 
 /**
  *
@@ -33,29 +37,35 @@ public class Logic {
         return true;
     }
 
-    public void turnEvtxIntoCSV(String path) throws IOException {
-        String command = "Get-WinEvent -Path " + path + "|Export-Csv eventlog.csv";
-//        Runtime runtime = Runtime.getRuntime();
-//        Process powerShellProcess = runtime.exec(command);
-//        InputStream is = powerShellProcess.getInputStream();
-//        InputStreamReader isr = new InputStreamReader(is);
-//        try (BufferedReader reader = new BufferedReader(isr)) {
-//            String line;
-//            System.out.println("3");
-//            while ((line = reader.readLine()) != null) {
-//                System.out.println(line);
-//                //System.out.println(reader.readLine());
-//                System.out.println("4");
-//            }
-//        }
-//        powerShellProcess.getOutputStream().close();
-//        System.out.println("5");
-        try {
-            ProcessBuilder pb = new ProcessBuilder(command);
-            Process p = pb.start(); // Start the process.
-            p.waitFor(); // Wait for the process to finish.
-            System.out.println("Script executed successfully");
-        } catch (IOException | InterruptedException e) {
+    
+    public void turnEvtxIntoCSV(String path) throws IOException{
+        String command = "Get-WinEvent -Path \"" + path + "\"|Export-Csv \"success.csv\"";
+        PowerShell powershell = PowerShell.openSession();
+        System.out.println(powershell.executeCommand(command).getCommandOutput());
+        powershell.close();
+        
+    }
+    public void openCSV(){
+        String fileNameDefined = "success.csv";
+        // -File class needed to turn stringName to actual file
+        File file = new File(fileNameDefined);
+
+        try{
+            // hashNext() loops line-by-line
+            try ( // -read from filePooped with Scanner class
+                    Scanner inputStream = new Scanner(file)) {
+                // hashNext() loops line-by-line
+                while (inputStream.hasNext()) {
+                    //read single line, put in string
+                    String data = inputStream.next();
+                    System.out.println(data + "***");
+                }
+                // after loop, close scanner
+            }
+
+
+        }catch (FileNotFoundException e){
+
             e.printStackTrace();
         }
 

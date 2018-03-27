@@ -21,7 +21,6 @@ public class Windows10_logs {
      */
     public static void main(String[] args) throws IOException {
         new Home().setVisible(true);
-        new Logic().turnEvtxIntoCSV("\\Users\\Rafael\\Desktop\\Microsoft-Windows-Application-Experience%4Program-Compatibility-Assistant.evtx");
 //        DataBase x = new DataBase();
 //        x.conectar();
 //        x.insertIntoGroups("lab", "laboratorio");
