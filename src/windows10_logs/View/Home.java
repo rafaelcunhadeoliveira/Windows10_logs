@@ -61,28 +61,27 @@ public class Home extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addGap(339, 339, 339)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(120, 120, 120)
+                        .addGap(17, 17, 17)
                         .addComponent(jButton1))
+                    .addComponent(jButton2)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(103, 103, 103)
-                        .addComponent(jButton2))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(131, 131, 131)
+                        .addGap(28, 28, 28)
                         .addComponent(jButton3)))
-                .addContainerGap(111, Short.MAX_VALUE))
+                .addContainerGap(358, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(38, 38, 38)
+                .addGap(196, 196, 196)
                 .addComponent(jButton1)
                 .addGap(49, 49, 49)
                 .addComponent(jButton2)
                 .addGap(50, 50, 50)
                 .addComponent(jButton3)
-                .addContainerGap(76, Short.MAX_VALUE))
+                .addContainerGap(272, Short.MAX_VALUE))
         );
 
         pack();

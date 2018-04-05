@@ -9,6 +9,7 @@ import com.profesorfalken.jpowershell.PowerShell;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -46,28 +47,26 @@ public class Logic {
         
     }
     public void openCSV(){
-        String fileNameDefined = "success.csv";
-        // -File class needed to turn stringName to actual file
-        File file = new File(fileNameDefined);
-
-        try{
-            // hashNext() loops line-by-line
-            try ( // -read from filePooped with Scanner class
-                    Scanner inputStream = new Scanner(file)) {
-                // hashNext() loops line-by-line
-                while (inputStream.hasNext()) {
-                    //read single line, put in string
-                    String data = inputStream.next();
-                    System.out.println(data + "***");
-                }
-                // after loop, close scanner
-            }
-
-
-        }catch (FileNotFoundException e){
-
-            e.printStackTrace();
-        }
-
+        BufferedReader reader = null;
+        String[] words = null;
+	try {
+		reader = new BufferedReader(new FileReader("success.csv"));
+		String line = null;
+		while ((line = reader.readLine()) != null) {
+			words = line.split(",");
+                        System.out.println(words);
+		}
+	} catch (FileNotFoundException e) {
+	} catch (IOException e) {
+	} finally {
+		if (reader != null) {
+			try {
+				reader.close();
+			} catch (IOException e) {
+			}
+		}
+	}
+        System.out.println(Arrays.toString(words));
+        
     }
 }
