@@ -7,10 +7,9 @@ package windows10_logs.View;
 
 import Controller.DataBase;
 import Controller.Logic;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -171,13 +170,24 @@ public class AddLog extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
- //       try {
+        try {
             //saveButton
- //           logic.turnEvtxIntoCSV(path);
-            logic.openCSV();
-//        } catch (IOException ex) {
-//            Logger.getLogger(AddLog.class.getName()).log(Level.SEVERE, null, ex);
-//        }
+            String value = (String) jComboBox2.getSelectedItem();
+            HashMap<Integer, ArrayList<String>> file = new HashMap<>();
+            int compId = logic.getIdFromHashMap(this.computers, value);
+            if (!actions.selectFromFilesUsingWhere(compId).isEmpty()) {
+                //TODO error
+            } else {
+                if (!this.path.isEmpty()) {
+                    logic.turnEvtxIntoCSV(path);
+                    actions.insertIntoLogs(logic.openCSV(), compId);
+                }else{
+                    //TODO error
+                }
+            }
+        } catch (IOException | SQLException ex) {
+            Logger.getLogger(AddLog.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
     }//GEN-LAST:event_jButton3ActionPerformed
 
@@ -196,17 +206,17 @@ public class AddLog extends javax.swing.JFrame {
         this.populateComp = true;
         this.populateComp();
     }//GEN-LAST:event_jComboBox2ActionPerformed
-    
+
     public void populateGroup() {
         try {
             this.groups = actions.selectFromGroup();
             jComboBox2.setModel(new DefaultComboBoxModel(groups.values().toArray()));
         } catch (SQLException ex) {
             Logger.getLogger(AddLog.class.getName()).log(Level.SEVERE, null, ex);
-        }  
+        }
     }
 
-    public void populateComp(){
+    public void populateComp() {
         try {
             String value = (String) jComboBox2.getSelectedItem();
             this.groupId = logic.getIdFromHashMap(this.groups, value);
@@ -225,8 +235,8 @@ public class AddLog extends javax.swing.JFrame {
             Logger.getLogger(AddLog.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
-    public void setFileChooser(){
+
+    public void setFileChooser() {
         JFileChooser chooser = new JFileChooser();
         FileNameExtensionFilter logFilter = new FileNameExtensionFilter("evtx Files (*.evtx)", "evtx");
         chooser.setDialogTitle("Windows 10 Log");
@@ -236,8 +246,9 @@ public class AddLog extends javax.swing.JFrame {
         chooser.showOpenDialog(this);
         path = chooser.getSelectedFile().toString();
         jTextField1.setText(path);
-        
+
     }
+
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -280,6 +291,5 @@ public class AddLog extends javax.swing.JFrame {
     private javax.swing.JTextArea jTextArea1;
     private javax.swing.JTextField jTextField1;
     // End of variables declaration//GEN-END:variables
-
 
 }

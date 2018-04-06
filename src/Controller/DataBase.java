@@ -118,6 +118,43 @@ public class DataBase {
             }
         }
     }
+    
+        public void insertIntoLogs(HashMap<Integer, ArrayList<String>> logs, int computer) throws SQLException {
+        String insertIntoTable = "INSERT INTO Windows10_Logs.Logs (message, id, version, qualifiers, "
+                + "level, task, opcode, keywords,"
+                + "recorderId, providerName, providerId, logName,"
+                + "processId, threadId, machineName, userId,"
+                + "timeCreated, relatedActivityId, containerLog, matchedQueryIds,"
+                + "bookmark, levelDisplayName, opcodeDisplayName, taskDisplayName,"
+                + "keywordsDisplayName, activityId, properties, local, FIle_idFIle) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+
+        try {
+            preparedStatement = connection.prepareStatement(insertIntoTable, Statement.RETURN_GENERATED_KEYS);
+            for (ArrayList<String> saveLog : logs.values()) {
+                int i = 1;
+                for (String object : saveLog) {
+                    preparedStatement.setString(i, object);
+                    i++;
+                }
+                preparedStatement.setInt(29, computer);
+            }
+            
+            preparedStatement.executeUpdate();
+
+            System.out.println("Linhas inseridas!");
+
+        } catch (SQLException e) {
+
+            System.out.println(e.getMessage());
+
+        } finally {
+
+            if (preparedStatement != null) {
+                preparedStatement.close();
+            }
+        }
+    }
+
 
     public HashMap<Integer, String> selectFromGroup() throws SQLException {
         String selectTableSQL = "SELECT * FROM Windows10_Logs.Group;";
@@ -213,6 +250,38 @@ public class DataBase {
 
         }
         return allComputers;
+    }
+    
+        public HashMap<Integer, String> selectFromFilesUsingWhere(int compId) throws SQLException {
+        String selectTableSQL = "SELECT * from Windows10_Logs.Computer  WHERE  Computer_idComputer = " + compId + ";";
+        HashMap<Integer, String> allFiles = new HashMap<>();
+        try {
+
+            preparedStatement = connection.prepareStatement(selectTableSQL, Statement.RETURN_GENERATED_KEYS);
+            ResultSet rs = preparedStatement.executeQuery();
+
+            int id;
+            String address;
+            while (rs.next()) {
+                id = rs.getInt(1);
+                address = rs.getString(2);
+                allFiles.put(id, address);
+            }
+
+        } catch (SQLException e) {
+
+            System.out.println(e.getMessage());
+
+        } finally {
+
+            if (preparedStatement != null) {
+
+                preparedStatement.close();
+
+            }
+
+        }
+        return allFiles;
     }
 
 }

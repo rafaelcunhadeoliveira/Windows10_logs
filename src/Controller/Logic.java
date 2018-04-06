@@ -37,7 +37,7 @@ public class Logic {
 
     }
 
-    public void openCSV() {
+    public HashMap<Integer, ArrayList<String>> openCSV() {
         BufferedReader reader = null;
         ArrayList<String> words;
         HashMap<Integer, ArrayList<String>> file = new HashMap<>();
@@ -68,11 +68,12 @@ public class Logic {
             if (reader != null) {
                 try {
                     reader.close();
+                    
                 } catch (IOException e) {
                 }
             }
         }
-
+        return file;
     }
 
     public boolean deleteSuccess() {
