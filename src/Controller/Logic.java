@@ -6,17 +6,8 @@
 package Controller;
 
 import com.profesorfalken.jpowershell.PowerShell;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.security.KeyStore.Entry;
+import java.io.*;
 import java.util.*;
-import javax.swing.*;
-
 
 /**
  *
@@ -38,35 +29,54 @@ public class Logic {
         return true;
     }
 
-    
-    public void turnEvtxIntoCSV(String path) throws IOException{
+    public void turnEvtxIntoCSV(String path) throws IOException {
         String command = "Get-WinEvent -Path \"" + path + "\"|Export-Csv \"success.csv\"";
         PowerShell powershell = PowerShell.openSession();
         System.out.println(powershell.executeCommand(command).getCommandOutput());
         powershell.close();
-        
+
     }
-    public void openCSV(){
+
+    public void openCSV() {
         BufferedReader reader = null;
-        String[] words = null;
-	try {
-		reader = new BufferedReader(new FileReader("success.csv"));
-		String line = null;
-		while ((line = reader.readLine()) != null) {
-			words = line.split(",");
-                        System.out.println(words);
-		}
-	} catch (FileNotFoundException e) {
-	} catch (IOException e) {
-	} finally {
-		if (reader != null) {
-			try {
-				reader.close();
-			} catch (IOException e) {
-			}
-		}
-	}
-        System.out.println(Arrays.toString(words));
-        
+        ArrayList<String> words;
+        HashMap<Integer, ArrayList<String>> file = new HashMap<>();
+        String local = "";
+        try {
+            reader = new BufferedReader(new FileReader("success.csv"));
+            String line;
+            int i = 0;
+            int j = 0;
+            while ((line = reader.readLine()) != null) {
+                words = new ArrayList<>(Arrays.asList(line.split(",")));
+                if (i > 1) {
+                    if (words.size() == 1) {
+                        if (!words.get(0).isEmpty()) {
+                            local = words.get(0);
+                        }
+                    } else {
+                        words.add(local);
+                        file.put(j, words);
+                        j++;
+                    }
+                }
+                i++;
+            }
+        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                }
+            }
+        }
+
+    }
+
+    public boolean deleteSuccess() {
+        File file = new File("success.csv");
+        return file.delete();
     }
 }

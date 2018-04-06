@@ -33,8 +33,8 @@ public class DataBase {
         }
 
     }
-    
-    public void closeCon() throws SQLException{
+
+    public void closeCon() throws SQLException {
         connection.close();
     }
 
@@ -73,10 +73,35 @@ public class DataBase {
         String insertIntoTable = "INSERT INTO Windows10_Logs.Computer (Name, Group_idGroup) VALUES (?,?);";
 
         try {
-            preparedStatement = connection.prepareStatement(insertIntoTable,  Statement.RETURN_GENERATED_KEYS);
+            preparedStatement = connection.prepareStatement(insertIntoTable, Statement.RETURN_GENERATED_KEYS);
 
             preparedStatement.setString(1, name);
             preparedStatement.setInt(2, group);
+
+            preparedStatement.executeUpdate();
+
+            System.out.println("Linhas inseridas!");
+
+        } catch (SQLException e) {
+
+            System.out.println(e.getMessage());
+
+        } finally {
+
+            if (preparedStatement != null) {
+                preparedStatement.close();
+            }
+        }
+    }
+
+    public void insertIntoFile(String address, int computer) throws SQLException {
+        String insertIntoTable = "INSERT INTO Windows10_Logs.File (Address, Computer_idComputer) VALUES (?,?);";
+
+        try {
+            preparedStatement = connection.prepareStatement(insertIntoTable, Statement.RETURN_GENERATED_KEYS);
+
+            preparedStatement.setString(1, address);
+            preparedStatement.setInt(2, computer);
 
             preparedStatement.executeUpdate();
 
@@ -157,9 +182,9 @@ public class DataBase {
         }
         return allComputers;
     }
-    
-     public HashMap<Integer, String> selectFromComputersUsingWhere(int groupId) throws SQLException {
-        String selectTableSQL = "SELECT * from Windows10_Logs.Computer  WHERE  Group_idGroup = " +groupId+ ";";
+
+    public HashMap<Integer, String> selectFromComputersUsingWhere(int groupId) throws SQLException {
+        String selectTableSQL = "SELECT * from Windows10_Logs.Computer  WHERE  Group_idGroup = " + groupId + ";";
         HashMap<Integer, String> allComputers = new HashMap<>();
         try {
 
