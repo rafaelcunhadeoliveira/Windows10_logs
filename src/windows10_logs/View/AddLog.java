@@ -9,7 +9,6 @@ import Controller.DataBase;
 import Controller.Logic;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -172,20 +171,24 @@ public class AddLog extends javax.swing.JFrame {
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         try {
             //saveButton
-            String value = (String) jComboBox2.getSelectedItem();
-            HashMap<Integer, ArrayList<String>> file = new HashMap<>();
+            JFrame parent = new JFrame();
+            String value = (String) jComboBox1.getSelectedItem();
             int compId = logic.getIdFromHashMap(this.computers, value);
+            
             if (!actions.selectFromFilesUsingWhere(compId).isEmpty()) {
                 //TODO error
             } else {
                 if (!this.path.isEmpty()) {
-                    logic.turnEvtxIntoCSV(path);
-                    actions.insertIntoLogs(logic.openCSV(), compId);
+                    actions.insertIntoFile(path, compId);
+ //                   logic.turnEvtxIntoCSV(path);
+                    HashMap<Integer, String>  files = actions.selectFromFiles();
+                    int fileId = logic.getIdFromHashMap(files, path);
+                    actions.insertIntoLogs(logic.openCSV(), fileId);
                 }else{
-                    //TODO error
+                     JOptionPane.showMessageDialog(parent, "Um caminho não foi especificado");
                 }
             }
-        } catch (IOException | SQLException ex) {
+        } catch (SQLException ex) {
             Logger.getLogger(AddLog.class.getName()).log(Level.SEVERE, null, ex);
         }
 

@@ -252,8 +252,40 @@ public class DataBase {
         return allComputers;
     }
     
+       public HashMap<Integer, String> selectFromFiles() throws SQLException {
+        String selectTableSQL = "SELECT * FROM Windows10_Logs.File;";
+        HashMap<Integer, String> allFiles = new HashMap<>();
+        try {
+
+            preparedStatement = connection.prepareStatement(selectTableSQL, Statement.RETURN_GENERATED_KEYS);
+            ResultSet rs = preparedStatement.executeQuery();
+
+            int id;
+            String address;
+            while (rs.next()) {
+                id = rs.getInt(1);
+                address = rs.getString(2);
+                allFiles.put(id, address);
+            }
+
+        } catch (SQLException e) {
+
+            System.out.println(e.getMessage());
+
+        } finally {
+
+            if (statement != null) {
+
+                statement.close();
+
+            }
+
+        }
+        return allFiles;
+    }
+    
         public HashMap<Integer, String> selectFromFilesUsingWhere(int compId) throws SQLException {
-        String selectTableSQL = "SELECT * from Windows10_Logs.Computer  WHERE  Computer_idComputer = " + compId + ";";
+        String selectTableSQL = "SELECT * from Windows10_Logs.File  WHERE  Computer_idComputer = " + compId + ";";
         HashMap<Integer, String> allFiles = new HashMap<>();
         try {
 
