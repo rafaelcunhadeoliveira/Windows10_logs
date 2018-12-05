@@ -135,7 +135,8 @@ public class AddComputer extends javax.swing.JFrame {
                 .addContainerGap(333, Short.MAX_VALUE))
         );
 
-        pack();
+        setSize(new java.awt.Dimension(890, 690));
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
@@ -156,16 +157,19 @@ public class AddComputer extends javax.swing.JFrame {
         //Save button
         DataBase insertDB = new DataBase();
         this.idComputer = jTextField2.getText();
-        String value = (String)jComboBox2.getSelectedItem();
+        String value = (String)jComboBox2.getSelectedItem() != null ? (String)jComboBox2.getSelectedItem(): "";
         this.groupId = new Logic().getIdFromHashMap(this.groups, value);
         JFrame parent = new JFrame();
-        if (this.idComputer.equalsIgnoreCase("")) {
+        if ("".equalsIgnoreCase(this.idComputer) || "".equalsIgnoreCase(value)) {
             JOptionPane.showMessageDialog(parent, "Ops, faltam algumas informações");
         } else {
             try {
                 insertDB.conectar();
-                insertDB.insertIntoComputer(this.idComputer, this.groupId);
-                JOptionPane.showMessageDialog(parent, "Computador Inserido!");
+                if(insertDB.insertIntoComputer(this.idComputer, this.groupId)){
+                    JOptionPane.showMessageDialog(parent, "Computador Inserido!");
+                }else{
+                    JOptionPane.showMessageDialog(parent, "Ocorreu algum problema, tente novamente mais tarde!");
+                }
                 insertDB.closeCon();
             } catch (SQLException ex) {
                 Logger.getLogger(AddGroup.class.getName()).log(Level.SEVERE, null, ex);

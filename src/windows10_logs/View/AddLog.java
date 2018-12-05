@@ -7,13 +7,14 @@ package windows10_logs.View;
 
 import Controller.DataBase;
 import Controller.Logic;
-import java.io.IOException;
+import Controller.PowerShellManager;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import java.io.*;
 
 /**
  *
@@ -24,10 +25,11 @@ public class AddLog extends javax.swing.JFrame {
     private HashMap<Integer, String> groups = new HashMap<>();
     private int groupId;
     private HashMap<Integer, String> computers;
-    private DataBase actions = new DataBase();
+    private DataBase database = new DataBase();
     private Boolean populateComp = false;
     private Logic logic = new Logic();
-    private String path = "";
+    private PowerShellManager ps = new PowerShellManager();
+    private String[] paths;
 
     public AddLog() {
         initComponents();
@@ -38,8 +40,8 @@ public class AddLog extends javax.swing.JFrame {
         }
     }
 
-    public void populate() throws SQLException {
-        actions.conectar();
+    private void populate() throws SQLException {
+        database.conectar();
         this.populateGroup();
         this.populateComp();
     }
@@ -160,7 +162,8 @@ public class AddLog extends javax.swing.JFrame {
                 .addContainerGap(325, Short.MAX_VALUE))
         );
 
-        pack();
+        setSize(new java.awt.Dimension(892, 687));
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
@@ -169,29 +172,54 @@ public class AddLog extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        JFrame parent = new JFrame();
+//        this.disableSaveButton();
+        int total = 0;
+        int actual = 1;
         try {
-            //saveButton
-            JFrame parent = new JFrame();
-            String value = (String) jComboBox1.getSelectedItem();
+            //           saveButton
+            String value = (String) jComboBox1.getSelectedItem() != null ? (String) jComboBox1.getSelectedItem() : "";
             int compId = logic.getIdFromHashMap(this.computers, value);
-            
-            if (!actions.selectFromFilesUsingWhere(compId).isEmpty()) {
-                //TODO error
+           
+            if (this.paths.length == 0 || value.equalsIgnoreCase("")) {
+                JOptionPane.showMessageDialog(parent, "Ops, faltam algumas informações!");
             } else {
-                if (!this.path.isEmpty()) {
-                    actions.insertIntoFile(path, compId);
- //                   logic.turnEvtxIntoCSV(path);
-                    HashMap<Integer, String>  files = actions.selectFromFiles();
-                    int fileId = logic.getIdFromHashMap(files, path);
-                    actions.insertIntoLogs(logic.openCSV(), fileId);
-                }else{
-                     JOptionPane.showMessageDialog(parent, "Um caminho não foi especificado");
+                total = paths.length;
+                for (String path : paths) {
+                    if (!logic.verifyIfExists(database.selectFromFilesUsingWhere(compId), path)) {
+                        database.insertIntoFile(path, compId);
+                        HashMap<Integer, String> files = database.selectFromFiles();
+                        int fileId = logic.getIdFromHashMap(files, path);
+                        //ps.openSession();
+                        logic.turnEvtxIntoCSV(path);
+                        HashMap temp = logic.openCSV();
+                        //logic.deleteFile();
+                        //ps.deleteSuccess();
+                        ps.closeSession();
+                        if (!temp.isEmpty()) {
+                            if (!database.insertIntoLogs(temp, fileId)) {
+                                JOptionPane.showMessageDialog(parent, "Ops, ocorreu um erro ao salvar o arquivo " + path);
+                                break;
+                            } else {
+                                JOptionPane.showMessageDialog(parent, "Arquivo " + path + " salvo!("+actual+"/"+total+")");
+                            }
+                        }
+                        else{
+                            JOptionPane.showMessageDialog(parent, "Esse arquivo não possui logs de erro! Next!");
+                        }       
+                    }else{
+                        JOptionPane.showMessageDialog(parent, "Ops, esse arquivo ja foi adicionado =)");
+                    }
+                    actual++;
                 }
             }
         } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(parent, "Ops, alguma coisa deu errado! Tente novamente mais tarde.");
+            Logger.getLogger(AddLog.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
             Logger.getLogger(AddLog.class.getName()).log(Level.SEVERE, null, ex);
         }
-
+ //       this.enableSaveButton();
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
@@ -212,7 +240,7 @@ public class AddLog extends javax.swing.JFrame {
 
     public void populateGroup() {
         try {
-            this.groups = actions.selectFromGroup();
+            this.groups = database.selectFromGroup();
             jComboBox2.setModel(new DefaultComboBoxModel(groups.values().toArray()));
         } catch (SQLException ex) {
             Logger.getLogger(AddLog.class.getName()).log(Level.SEVERE, null, ex);
@@ -223,7 +251,7 @@ public class AddLog extends javax.swing.JFrame {
         try {
             String value = (String) jComboBox2.getSelectedItem();
             this.groupId = logic.getIdFromHashMap(this.groups, value);
-            this.computers = actions.selectFromComputersUsingWhere(groupId);
+            this.computers = database.selectFromComputersUsingWhere(groupId);
             JFrame parent = new JFrame();
             if (computers.isEmpty()) {
                 if (this.populateComp) {
@@ -244,14 +272,26 @@ public class AddLog extends javax.swing.JFrame {
         FileNameExtensionFilter logFilter = new FileNameExtensionFilter("evtx Files (*.evtx)", "evtx");
         chooser.setDialogTitle("Windows 10 Log");
         chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        chooser.setMultiSelectionEnabled(true);
         chooser.addChoosableFileFilter(logFilter);
         chooser.setFileFilter(logFilter);
         chooser.showOpenDialog(this);
-        path = chooser.getSelectedFile().toString();
-        jTextField1.setText(path);
+        File[] files = chooser.getSelectedFiles();
+        paths = logic.convertToString(files);
+        jTextField1.setText(String.join(", ", paths));
 
     }
-
+    
+    public void enableSaveButton(){
+        jButton3.setText("Save");
+        jButton3.setEnabled(true);
+    }
+    
+    public void disableSaveButton(){
+        jButton3.setText("Saving...");
+        jButton3.setEnabled(false);
+    }
+    
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
